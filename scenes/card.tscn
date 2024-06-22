@@ -1,0 +1,44 @@
+[gd_scene load_steps=5 format=3 uid="uid://dlpdrg1b1lu1a"]
+
+[ext_resource type="Texture2D" uid="uid://c4a6otmqawo51" path="res://assets/Card_Back_Red.png" id="1_q2eq1"]
+[ext_resource type="Script" path="res://scripts/card.gd" id="1_q6g3j"]
+[ext_resource type="Shader" path="res://shaders/2d_perspective.gdshader" id="2_ukg5a"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yepu1"]
+resource_local_to_scene = true
+shader = ExtResource("2_ukg5a")
+shader_parameter/fov = 90.0
+shader_parameter/cull_back = true
+shader_parameter/y_rot = 8.55e-06
+shader_parameter/x_rot = 8.55e-06
+shader_parameter/inset = 0.0
+
+[node name="Card" type="Button"]
+self_modulate = Color(1, 1, 1, 0)
+anchors_preset = -1
+offset_right = 88.0
+offset_bottom = 124.0
+script = ExtResource("1_q6g3j")
+angle_x_max = 0.2
+angle_y_max = 0.2
+scale_amount = 1.2
+max_offset_shadow = 50.0
+
+[node name="CardShadow" type="TextureRect" parent="."]
+modulate = Color(0, 0, 0, 0.235294)
+layout_mode = 0
+offset_top = 15.0
+offset_right = 88.0
+offset_bottom = 139.0
+texture = ExtResource("1_q2eq1")
+
+[node name="CardTexture" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_yepu1")
+layout_mode = 0
+offset_right = 88.0
+offset_bottom = 124.0
+texture = ExtResource("1_q2eq1")
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

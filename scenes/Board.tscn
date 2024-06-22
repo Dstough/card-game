@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3 uid="uid://dukqqvem12jv7"]
+
+[ext_resource type="PackedScene" uid="uid://dlpdrg1b1lu1a" path="res://scenes/card.tscn" id="1_47oex"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_tq3jf"]
+
+[node name="Board" type="Node2D"]
+
+[node name="TextureRect" type="TextureRect" parent="."]
+modulate = Color(0.409524, 0.832177, 0, 1)
+self_modulate = Color(0.298674, 0.620467, 0, 1)
+offset_right = 1152.0
+offset_bottom = 649.0
+texture = SubResource("CanvasTexture_tq3jf")
+
+[node name="Card" parent="." instance=ExtResource("1_47oex")]
+anchors_preset = 0
+offset_left = 105.0
+offset_top = 286.0
+offset_right = 193.0
+offset_bottom = 410.0
+
+[node name="Card2" parent="." instance=ExtResource("1_47oex")]
+anchors_preset = 0
+offset_left = 357.0
+offset_top = 293.0
+offset_right = 445.0
+offset_bottom = 417.0
+
+[node name="Card3" parent="." instance=ExtResource("1_47oex")]
+anchors_preset = 0
+offset_left = 425.0
+offset_top = 293.0
+offset_right = 513.0
+offset_bottom = 417.0
+
+[node name="Card4" parent="." instance=ExtResource("1_47oex")]
+anchors_preset = 0
+offset_left = 492.0
+offset_top = 293.0
+offset_right = 580.0
+offset_bottom = 417.0
+
+[node name="Card5" parent="." instance=ExtResource("1_47oex")]
+anchors_preset = 0
+offset_left = 948.0
+offset_top = 301.0
+offset_right = 1036.0
+offset_bottom = 425.0
+angle_x_max = 0.2
+angle_y_max = 0.2
