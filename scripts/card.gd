@@ -1,6 +1,6 @@
 extends Button
 
-@export_category("Hovering")
+@export_category("Hover Values")
 @export var scale_amount: float = 1.5
 @export var max_offset_shadow: float = 50
 
@@ -19,6 +19,7 @@ var card_shadow: TextureRect
 var tween_rotation: Tween
 var tween_hover: Tween
 var tween_tilt: Tween
+var tween_lean: Tween
 
 var original_scale: Vector2
 var velocity: Vector2
@@ -30,7 +31,6 @@ var displacement: float
 var oscillator_velocity: float
 
 #region signals
-
 
 func _ready():
 	card_texture = $CardTexture
@@ -47,7 +47,7 @@ func _ready():
 func _process(_delta):
 	handle_shadow_position()
 	handle_card_following_mouse()
-	handle_card_lean_on_move(_delta)
+	handle_card_lean(_delta)
 
 
 func _on_gui_input(_event):
@@ -65,33 +65,16 @@ func _on_mouse_exited():
 
 #endregion
 
-
 #region handlers
 
-
 func handle_card_focus():	
-	if tween_hover and tween_hover.is_running():
-		tween_hover.kill()
-	tween_hover = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
-	tween_hover.tween_property(self, "scale", Vector2(scale_amount, scale_amount), 0.5)	
-	
+	scale_to(scale_amount)
 	z_index += 1
 
 
 func handle_card_blur():
-	# Reset Rotation
-	if tween_rotation and tween_rotation.is_running():
-		tween_rotation.kill()
-	tween_rotation = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK).set_parallel(true)
-	tween_rotation.tween_property(card_texture.material, "shader_parameter/x_rot", 0.0, 0.5)
-	tween_rotation.tween_property(card_texture.material, "shader_parameter/y_rot", 0.0, 0.5)
-	
-	# Reset Scale
-	if tween_hover and tween_hover.is_running():
-		tween_hover.kill()
-	tween_hover = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
-	tween_hover.tween_property(self, "scale", Vector2.ONE, .55)
-	
+	tilt_to(0.0, 0.0)
+	scale_to(1)
 	z_index -= 1
 
 
@@ -109,16 +92,11 @@ func handle_mouse_click(event):
 	if event.is_pressed():
 		following_mouse = true
 		GameManager.local_player_is_holding_card = true
-		
-		#card_texture.material.set_shader_parameter("x_rot", 0)
-		#card_texture.material.set_shader_parameter("y_rot", 0)
-		
 		self.get_parent().move_child(self, -1)
-		
 	else:
 		following_mouse = false
 		GameManager.local_player_is_holding_card = false
-		tilt_to_angle(0)
+		lean_to(0)
 
 
 func handle_card_following_mouse():
@@ -128,14 +106,10 @@ func handle_card_following_mouse():
 	var mouse_position = get_global_mouse_position()
 	
 	global_position = mouse_position - (size / 2.0)
+	tilt_to(0.0, 0.0)
 
 
 func handle_card_tilting():
-	
-	#if following_mouse:
-	#	return
-	
-	#Handle Rotation
 	var mouse_position: Vector2 = get_local_mouse_position()
 	
 	var lerp_value_x: float = remap(mouse_position.x, 0.0, size.x, 0, 1)
@@ -145,15 +119,15 @@ func handle_card_tilting():
 	var rotation_y: float = rad_to_deg(lerp_angle(angle_y_max, -angle_y_max, lerp_value_y))
 	
 	# Why the f*ck are these reversed?!?
+	# Somehow it works but I can't grasp exactly why.
 	card_texture.material.set_shader_parameter("x_rot", rotation_y)
 	card_texture.material.set_shader_parameter("y_rot", rotation_x)
 
 
-func handle_card_lean_on_move(delta):
+func handle_card_lean(delta):
 	if not following_mouse: 
 		return
 	
-	# Compute the velocity
 	velocity = (position - last_position) / delta
 	last_position = position
 	
@@ -169,16 +143,29 @@ func handle_card_lean_on_move(delta):
 
 #endregion
 
-
 #region utility
 
+func scale_to(_size):
+	if tween_hover and tween_hover.is_running():
+		tween_hover.kill()
+	tween_hover = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+	tween_hover.tween_property(self, "scale", Vector2(_size, _size), 0.5)
 
-func tilt_to_angle(angle):
+
+func lean_to(_angle):
 	if tween_tilt and tween_tilt.is_running():
 		tween_tilt.kill()
 	
 	tween_tilt = create_tween().set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_CUBIC)
-	tween_tilt.tween_property(self, "rotation", deg_to_rad(angle), 0.3)
+	tween_tilt.tween_property(self, "rotation", deg_to_rad(_angle), 0.3)
+
+
+func tilt_to(_angle_x, _angle_y):
+	if tween_rotation and tween_rotation.is_running():
+		tween_rotation.kill()
+	tween_rotation = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK).set_parallel(true)
+	tween_rotation.tween_property(card_texture.material, "shader_parameter/x_rot", _angle_x, 0.5)
+	tween_rotation.tween_property(card_texture.material, "shader_parameter/y_rot", _angle_y, 0.5)
 
 
 #endregion
