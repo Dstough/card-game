@@ -1,24 +1,45 @@
 extends Button
 
+@export_category("Hovering")
+@export var scale_amount: float = 1.5
+@export var max_offset_shadow: float = 50
 
-@export var angle_x_max: float
-@export var angle_y_max: float
-@export var scale_amount: float
-@export var max_offset_shadow: float
+@export_category("Tilt Values")
+@export var angle_x_max: float = 15
+@export var angle_y_max: float = 15
+
+@export_category("Oscillator")
+@export var spring: float = 150
+@export var damp: float = 10
+@export var velocity_multiplier: float = 1
 
 var card_texture: TextureRect
 var card_shadow: TextureRect
+
 var tween_rotation: Tween
 var tween_hover: Tween
+var tween_tilt: Tween
+
 var original_scale: Vector2
-var followring_mouse: bool
+var velocity: Vector2
+var last_position: Vector2
+
+var following_mouse: bool
+
+var displacement: float
+var oscillator_velocity: float
+
+#region signals
 
 
 func _ready():
 	card_texture = $CardTexture
 	card_shadow = $CardShadow
 	
-	followring_mouse = false;
+	angle_x_max = deg_to_rad(angle_x_max)
+	angle_y_max = deg_to_rad(angle_y_max)
+	
+	following_mouse = false;
 	original_scale = scale
 	pivot_offset = Vector2(size.x / 2, size.y / 2)
 
@@ -26,6 +47,7 @@ func _ready():
 func _process(_delta):
 	handle_shadow_position()
 	handle_card_following_mouse()
+	handle_card_lean_on_move(_delta)
 
 
 func _on_gui_input(_event):
@@ -33,12 +55,18 @@ func _on_gui_input(_event):
 	handle_card_tilting()
 
 
-func _on_mouse_entered() -> void:
+func _on_mouse_entered():
 	handle_card_focus()
 
 
-func _on_mouse_exited() -> void:
+func _on_mouse_exited():
 	handle_card_blur()
+
+
+#endregion
+
+
+#region handlers
 
 
 func handle_card_focus():	
@@ -79,16 +107,22 @@ func handle_mouse_click(event):
 		return
 	
 	if event.is_pressed():
-		followring_mouse = true
+		following_mouse = true
 		GameManager.local_player_is_holding_card = true
+		
+		#card_texture.material.set_shader_parameter("x_rot", 0)
+		#card_texture.material.set_shader_parameter("y_rot", 0)
+		
 		self.get_parent().move_child(self, -1)
+		
 	else:
-		followring_mouse = false
+		following_mouse = false
 		GameManager.local_player_is_holding_card = false
+		tilt_to_angle(0)
 
 
 func handle_card_following_mouse():
-	if not followring_mouse:
+	if not following_mouse:
 		return
 	
 	var mouse_position = get_global_mouse_position()
@@ -97,7 +131,10 @@ func handle_card_following_mouse():
 
 
 func handle_card_tilting():
-
+	
+	#if following_mouse:
+	#	return
+	
 	#Handle Rotation
 	var mouse_position: Vector2 = get_local_mouse_position()
 	
@@ -110,3 +147,38 @@ func handle_card_tilting():
 	# Why the f*ck are these reversed?!?
 	card_texture.material.set_shader_parameter("x_rot", rotation_y)
 	card_texture.material.set_shader_parameter("y_rot", rotation_x)
+
+
+func handle_card_lean_on_move(delta):
+	if not following_mouse: 
+		return
+	
+	# Compute the velocity
+	velocity = (position - last_position) / delta
+	last_position = position
+	
+	oscillator_velocity += velocity.normalized().x * velocity_multiplier
+	
+	# Oscillator stuff
+	var force = -spring * displacement - damp * oscillator_velocity
+	oscillator_velocity += force * delta
+	displacement += oscillator_velocity * delta
+	
+	rotation = displacement
+
+
+#endregion
+
+
+#region utility
+
+
+func tilt_to_angle(angle):
+	if tween_tilt and tween_tilt.is_running():
+		tween_tilt.kill()
+	
+	tween_tilt = create_tween().set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_CUBIC)
+	tween_tilt.tween_property(self, "rotation", deg_to_rad(angle), 0.3)
+
+
+#endregion

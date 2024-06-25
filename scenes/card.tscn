@@ -19,10 +19,6 @@ anchors_preset = -1
 offset_right = 88.0
 offset_bottom = 124.0
 script = ExtResource("1_q6g3j")
-angle_x_max = 0.2
-angle_y_max = 0.2
-scale_amount = 1.2
-max_offset_shadow = 50.0
 
 [node name="CardShadow" type="TextureRect" parent="."]
 modulate = Color(0, 0, 0, 0.235294)
