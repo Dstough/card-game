@@ -2,16 +2,8 @@
 
 [ext_resource type="Texture2D" uid="uid://c4a6otmqawo51" path="res://assets/Card_Back_Red.png" id="1_q2eq1"]
 [ext_resource type="Script" path="res://scripts/card.gd" id="1_q6g3j"]
-[ext_resource type="Shader" path="res://shaders/2d_perspective.gdshader" id="2_ukg5a"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_yepu1"]
-resource_local_to_scene = true
-shader = ExtResource("2_ukg5a")
-shader_parameter/fov = 90.0
-shader_parameter/cull_back = true
-shader_parameter/y_rot = 8.55e-06
-shader_parameter/x_rot = 8.55e-06
-shader_parameter/inset = 0.0
+[ext_resource type="Texture2D" uid="uid://t80j0tamyix3" path="res://assets/Card_Shadow.png" id="2_hp3dw"]
+[ext_resource type="Material" uid="uid://bl4bs0vvvpve5" path="res://materials/2d_perspective.tres" id="3_qbut0"]
 
 [node name="Card" type="Button"]
 self_modulate = Color(1, 1, 1, 0)
@@ -19,17 +11,20 @@ anchors_preset = -1
 offset_right = 88.0
 offset_bottom = 124.0
 script = ExtResource("1_q6g3j")
+scale_amount = 1.1
+angle_x_max = 10.0
+angle_y_max = 10.0
 
 [node name="CardShadow" type="TextureRect" parent="."]
-modulate = Color(0, 0, 0, 0.235294)
+material = ExtResource("3_qbut0")
 layout_mode = 0
 offset_top = 15.0
 offset_right = 88.0
 offset_bottom = 139.0
-texture = ExtResource("1_q2eq1")
+texture = ExtResource("2_hp3dw")
 
 [node name="CardTexture" type="TextureRect" parent="."]
-material = SubResource("ShaderMaterial_yepu1")
+material = ExtResource("3_qbut0")
 layout_mode = 0
 offset_right = 88.0
 offset_bottom = 124.0

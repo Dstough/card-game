@@ -16,16 +16,20 @@ extends Button
 var card_texture: TextureRect
 var card_shadow: TextureRect
 
+var burning_material: Material
+
 var tween_rotation: Tween
 var tween_hover: Tween
 var tween_tilt: Tween
 var tween_lean: Tween
+var tween_destroy: Tween
 
 var original_scale: Vector2
 var velocity: Vector2
 var last_position: Vector2
 
 var following_mouse: bool
+var being_destroyed: bool
 
 var displacement: float
 var oscillator_velocity: float
@@ -42,6 +46,7 @@ func _ready():
 	following_mouse = false;
 	original_scale = scale
 	pivot_offset = Vector2(size.x / 2, size.y / 2)
+	burning_material = load("res://materials/burn_away.tres").duplicate()
 
 
 func _process(_delta):
@@ -51,7 +56,7 @@ func _process(_delta):
 
 
 func _on_gui_input(_event):
-	handle_mouse_click(_event)
+	handle_mouse_clicks(_event)
 	handle_card_tilting()
 
 
@@ -85,17 +90,23 @@ func handle_shadow_position():
 	card_shadow.position.x = lerp(0.0, -sign(distance) * max_offset_shadow, abs(distance / (center.x)))
 
 
-func handle_mouse_click(event):
+func handle_mouse_clicks(event):
 	if not event is InputEventMouseButton: 
 		return
-	
+		
 	if event.is_pressed():
+		
+		if not being_destroyed:
+			match event.button_index:
+				MOUSE_BUTTON_RIGHT:
+					being_destroyed = true;
+					destory()
+					return
+				
 		following_mouse = true
-		GameManager.local_player_is_holding_card = true
 		self.get_parent().move_child(self, -1)
 	else:
 		following_mouse = false
-		GameManager.local_player_is_holding_card = false
 		lean_to(0)
 
 
@@ -166,6 +177,21 @@ func tilt_to(_angle_x, _angle_y):
 	tween_rotation = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK).set_parallel(true)
 	tween_rotation.tween_property(card_texture.material, "shader_parameter/x_rot", _angle_x, 0.5)
 	tween_rotation.tween_property(card_texture.material, "shader_parameter/y_rot", _angle_y, 0.5)
+
+
+#endregion
+
+#region commands
+
+func destory():
+	card_texture.material = burning_material
+	card_shadow.material = burning_material
+	
+	if tween_destroy and tween_destroy.is_running():
+		tween_destroy.kill()
+	tween_destroy = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween_destroy.tween_property(burning_material, "shader_parameter/dissolve_value", 0.0, 2)
+	tween_destroy.tween_callback(queue_free)
 
 
 #endregion

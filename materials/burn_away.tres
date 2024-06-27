@@ -1,0 +1,18 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3 uid="uid://dvvnq0vynjqf2"]
+
+[ext_resource type="Shader" path="res://shaders/burn_away.gdshader" id="1_kw433"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5dq87"]
+frequency = 0.0027
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_xn1mp"]
+invert = true
+noise = SubResource("FastNoiseLite_5dq87")
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1_kw433")
+shader_parameter/dissolve_value = 1.0
+shader_parameter/burn_size = 0.1
+shader_parameter/burn_color = Color(1, 0.806, 0.03, 1)
+shader_parameter/dissolve_texture = SubResource("NoiseTexture2D_xn1mp")
