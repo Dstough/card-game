@@ -1,13 +1,18 @@
 [gd_scene load_steps=5 format=3 uid="uid://dlpdrg1b1lu1a"]
 
-[ext_resource type="Texture2D" uid="uid://c4a6otmqawo51" path="res://assets/Card_Back_Red.png" id="1_q2eq1"]
 [ext_resource type="Script" path="res://scripts/card.gd" id="1_q6g3j"]
-[ext_resource type="Texture2D" uid="uid://t80j0tamyix3" path="res://assets/Card_Shadow.png" id="2_hp3dw"]
 [ext_resource type="Material" uid="uid://bl4bs0vvvpve5" path="res://materials/2d_perspective.tres" id="3_qbut0"]
+[ext_resource type="Texture2D" uid="uid://t80j0tamyix3" path="res://assets/images/Card_Shadow.png" id="3_v4rcw"]
+[ext_resource type="Texture2D" uid="uid://c4a6otmqawo51" path="res://assets/images/Card_Back_Red.png" id="4_e0dwi"]
 
-[node name="Card" type="Button"]
-self_modulate = Color(1, 1, 1, 0)
+[node name="Base" type="TextureRect"]
+modulate = Color(0, 0.638955, 1.34766e-06, 1)
 anchors_preset = -1
+offset_right = 88.0
+offset_bottom = 124.0
+
+[node name="Card" type="Button" parent="."]
+self_modulate = Color(1, 1, 1, 0)
 offset_right = 88.0
 offset_bottom = 124.0
 script = ExtResource("1_q6g3j")
@@ -15,21 +20,21 @@ scale_amount = 1.1
 angle_x_max = 10.0
 angle_y_max = 10.0
 
-[node name="CardShadow" type="TextureRect" parent="."]
+[node name="CardShadow" type="TextureRect" parent="Card"]
 material = ExtResource("3_qbut0")
 layout_mode = 0
 offset_top = 15.0
 offset_right = 88.0
 offset_bottom = 139.0
-texture = ExtResource("2_hp3dw")
+texture = ExtResource("3_v4rcw")
 
-[node name="CardTexture" type="TextureRect" parent="."]
+[node name="CardTexture" type="TextureRect" parent="Card"]
 material = ExtResource("3_qbut0")
 layout_mode = 0
 offset_right = 88.0
 offset_bottom = 124.0
-texture = ExtResource("1_q2eq1")
+texture = ExtResource("4_e0dwi")
 
-[connection signal="gui_input" from="." to="." method="_on_gui_input"]
-[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]
+[connection signal="gui_input" from="Card" to="Card" method="_on_gui_input"]
+[connection signal="mouse_entered" from="Card" to="Card" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Card" to="Card" method="_on_mouse_exited"]

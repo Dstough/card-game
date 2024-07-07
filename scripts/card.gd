@@ -15,6 +15,7 @@ extends Button
 
 var card_texture: TextureRect
 var card_shadow: TextureRect
+var card_base: TextureRect
 
 var burning_material: Material
 
@@ -39,6 +40,7 @@ var oscillator_velocity: float
 func _ready():
 	card_texture = $CardTexture
 	card_shadow = $CardShadow
+	card_base = $".."
 	
 	angle_x_max = deg_to_rad(angle_x_max)
 	angle_y_max = deg_to_rad(angle_y_max)
@@ -72,14 +74,15 @@ func _on_mouse_exited():
 
 #region handlers
 
-func handle_card_focus():	
-	scale_to(scale_amount)
+func handle_card_focus():
+	
+	Util.scale_to(self, scale_amount)
 	z_index += 1
 
 
 func handle_card_blur():
 	tilt_to(0.0, 0.0)
-	scale_to(1)
+	Util.scale_to(self, 1)
 	z_index -= 1
 
 
@@ -107,7 +110,8 @@ func handle_mouse_clicks(event):
 		self.get_parent().move_child(self, -1)
 	else:
 		following_mouse = false
-		lean_to(0)
+		Util.lean_to(self, 0)
+		Util.move_to(self, card_base.global_position)
 
 
 func handle_card_following_mouse():
@@ -117,7 +121,6 @@ func handle_card_following_mouse():
 	var mouse_position = get_global_mouse_position()
 	
 	global_position = mouse_position - (size / 2.0)
-	tilt_to(0.0, 0.0)
 
 
 func handle_card_tilting():
@@ -156,20 +159,6 @@ func handle_card_lean(delta):
 
 #region utility
 
-func scale_to(_size):
-	if tween_hover and tween_hover.is_running():
-		tween_hover.kill()
-	tween_hover = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
-	tween_hover.tween_property(self, "scale", Vector2(_size, _size), 0.5)
-
-
-func lean_to(_angle):
-	if tween_tilt and tween_tilt.is_running():
-		tween_tilt.kill()
-	
-	tween_tilt = create_tween().set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_CUBIC)
-	tween_tilt.tween_property(self, "rotation", deg_to_rad(_angle), 0.3)
-
 
 func tilt_to(_angle_x, _angle_y):
 	if tween_rotation and tween_rotation.is_running():
@@ -192,6 +181,7 @@ func destory():
 	tween_destroy = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tween_destroy.tween_property(burning_material, "shader_parameter/dissolve_value", 0.0, 2)
 	tween_destroy.tween_callback(queue_free)
+	tween_destroy.tween_callback(card_base.queue_free)
 
 
 #endregion
